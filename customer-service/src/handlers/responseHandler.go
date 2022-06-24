@@ -1,13 +1,13 @@
 package handlers
 
 import (
-	models "customer-service/src/infrastructure/models/shared"
+	errors "customer-service/src/infrastructure/models/shared/errors"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
-type ResponseHandler func(http.ResponseWriter, *http.Request) (interface{}, *models.CustomError)
+type ResponseHandler func(http.ResponseWriter, *http.Request) (interface{}, *errors.CustomError)
 
 func (fn ResponseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	response, err := fn(w, r)
