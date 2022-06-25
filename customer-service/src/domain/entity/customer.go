@@ -4,11 +4,11 @@ import (
 	valueObject "customer-service/src/domain/valueObject"
 	"time"
 
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Customer struct {
-	Id        uuid.UUID           `bson:"Id"`
+	Id        primitive.ObjectID  `bson:"_id"`
 	Name      string              `bson:"Name"`
 	Email     string              `bson:"Email"`
 	Address   valueObject.Address `bson:"Address"`
