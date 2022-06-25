@@ -10,14 +10,15 @@ import (
 
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
-	router.Handle("/customerservice", handlers.ResponseHandler(handlers.CreateCustomer)).Methods("POST")
-	router.Handle("/customerservice/update", handlers.ResponseHandler(handlers.UpdateCustomer)).Methods("POST")
 
-	router.Handle("/customerservice", handlers.ResponseHandler(handlers.GetAllCustomer)).Methods("GET")
-	router.Handle("/customerservice/{customer_id}", handlers.ResponseHandler(handlers.GetCustomer)).Methods("GET")
-	router.Handle("/customerservice/validate/:customer_id", handlers.ResponseHandler(handlers.ValidationCheckCustomer)).Methods("GET")
+	router.HandleFunc("/", handlers.CreateCustomer).Methods(http.MethodPost)
+	router.HandleFunc("/", handlers.UpdateCustomer).Methods(http.MethodPut)
 
-	router.Handle("/customerservice", handlers.ResponseHandler(handlers.DeleteCustomer)).Methods("DELETE")
+	router.HandleFunc("/", handlers.GetAllCustomer).Methods(http.MethodGet)
+	router.HandleFunc("/{id}", handlers.GetCustomer).Methods(http.MethodGet)
+	router.HandleFunc("/validate/{id", handlers.ValidationCheckCustomer).Methods(http.MethodGet)
+
+	router.HandleFunc("/{id}", handlers.DeleteCustomer).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
