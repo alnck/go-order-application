@@ -1,7 +1,7 @@
 package infrastructure
 
 import (
-	"customer-service/src/domain/repository"
+	"customer-service/src/infrastructure/repository"
 	"customer-service/src/services"
 )
 

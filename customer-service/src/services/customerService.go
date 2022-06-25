@@ -2,8 +2,8 @@ package services
 
 import (
 	"customer-service/src/domain/entity"
-	"customer-service/src/domain/repository"
 	request "customer-service/src/infrastructure/models/request"
+	"customer-service/src/infrastructure/repository"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
