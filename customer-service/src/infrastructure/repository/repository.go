@@ -5,6 +5,7 @@ import (
 	"customer-service/src/domain/entity"
 	"log"
 	"sync"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -69,11 +70,20 @@ func (*customerRepository) Create(customer *entity.Customer) error {
 }
 
 func (*customerRepository) Update(customer *entity.Customer) error {
+
+	updateDocument := bson.M{
+		"$set": bson.M{
+			"Name":      customer.Name,
+			"Email":     customer.Email,
+			"Address":   customer.Address,
+			"UpdatedAt": time.Now().UTC(),
+		},
+	}
 	_, err := DBInstance.Collection(_collectionName).
 		UpdateOne(
 			context.Background(),
 			bson.M{"_id": customer.Id},
-			customer)
+			updateDocument)
 
 	return err
 }

@@ -24,6 +24,12 @@ func Respond(w http.ResponseWriter, code int, src interface{}) {
 	var body []byte
 	var err error
 
+	if src == nil {
+		w.WriteHeader(code)
+		w.Write(body)
+		return
+	}
+
 	switch s := src.(type) {
 	case []byte:
 		if !json.Valid(s) {

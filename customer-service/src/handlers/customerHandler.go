@@ -17,6 +17,7 @@ func Create(w http.ResponseWriter, r *http.Request, service services.ICustomerSe
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
+
 	err = service.Create(model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
@@ -32,7 +33,7 @@ func Update(w http.ResponseWriter, r *http.Request, service services.ICustomerSe
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
-	//Todo go services valid
+
 	err = service.Update(model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
@@ -49,8 +50,10 @@ func Delete(w http.ResponseWriter, r *http.Request, service services.ICustomerSe
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
-	//Todo go services valid
-	service.Delete(id)
+	err = service.Delete(id)
+	if err != nil {
+		Error(w, http.StatusInternalServerError, err, err.Error())
+	}
 
 	JSON(w, http.StatusOK, nil)
 }
@@ -61,13 +64,12 @@ func Get(w http.ResponseWriter, r *http.Request, service services.ICustomerServi
 
 	id, err := primitive.ObjectIDFromHex(customerId)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		Error(w, http.StatusBadRequest, err, err.Error())
 	}
 
-	//Todo go services valid
 	responseModel, err := service.GetById(id)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
 	JSON(w, http.StatusOK, responseModel)
 }
@@ -84,7 +86,7 @@ func GetAll(w http.ResponseWriter, r *http.Request, service services.ICustomerSe
 
 	responseModel, err := service.GetAll(page, limit)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
 
 	JSON(w, http.StatusOK, responseModel)
@@ -98,10 +100,10 @@ func Validate(w http.ResponseWriter, r *http.Request, service services.ICustomer
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
-	//Todo go services valid
+
 	isValid, err := service.IsValid(id)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
 	if isValid {
 		JSON(w, http.StatusOK, nil)
