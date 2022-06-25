@@ -15,7 +15,7 @@ type (
 		Update(requestModel request.UpdateCustonerRequestModel) error
 		Delete(id primitive.ObjectID) error
 		GetById(id primitive.ObjectID) (entity.Customer, error)
-		GetAll() ([]entity.Customer, error)
+		GetAll(page int, limit int) ([]entity.Customer, error)
 		IsValid(id primitive.ObjectID) (bool, error)
 	}
 	customerService struct {
@@ -29,6 +29,7 @@ func NewCustomerService(repository repository.ICustomerRepository) ICustomerServ
 
 func (service customerService) Create(requestModel request.CreateCustomerRequestModel) error {
 	model := entity.Customer{
+		Id:        primitive.NewObjectID(),
 		Name:      requestModel.Name,
 		Email:     requestModel.Email,
 		Address:   requestModel.Address,
@@ -61,9 +62,9 @@ func (service customerService) GetById(id primitive.ObjectID) (entity.Customer, 
 	return customer, err
 }
 
-func (service customerService) GetAll() ([]entity.Customer, error) {
+func (service customerService) GetAll(page int, limit int) ([]entity.Customer, error) {
 	var customers []entity.Customer
-	err := service.Repository.GetAll(&customers)
+	err := service.Repository.GetAll(&customers, page, limit)
 	return customers, err
 }
 

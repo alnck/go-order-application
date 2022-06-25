@@ -5,6 +5,7 @@ import (
 	"customer-service/src/services"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -72,7 +73,16 @@ func Get(w http.ResponseWriter, r *http.Request, service services.ICustomerServi
 }
 
 func GetAll(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
-	responseModel, err := service.GetAll()
+	page, errPage := strconv.Atoi(r.URL.Query().Get("page"))
+	if errPage != nil || page < 1 {
+		page = 1
+	}
+	limit, errLimit := strconv.Atoi(r.URL.Query().Get("limit"))
+	if errLimit != nil || limit < 1 {
+		limit = 10
+	}
+
+	responseModel, err := service.GetAll(page, limit)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}

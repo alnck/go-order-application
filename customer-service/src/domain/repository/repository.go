@@ -18,7 +18,7 @@ type ICustomerRepository interface {
 	Create(customer *entity.Customer) error
 	Update(customer *entity.Customer) error
 	Delete(Id primitive.ObjectID) error
-	GetAll(customer interface{}) error
+	GetAll(customer interface{}, page int, limit int) error
 	GetById(Id primitive.ObjectID, customer interface{}) error
 	IsValid(Id primitive.ObjectID) (bool, error)
 }
@@ -84,14 +84,19 @@ func (*customerRepository) Delete(Id primitive.ObjectID) error {
 	return err
 }
 
-func (*customerRepository) GetAll(customers interface{}) error {
-	cursor, err := DBInstance.Collection(_collectionName).Find(context.Background(), bson.M{})
+func (*customerRepository) GetAll(customers interface{}, page int, limit int) error {
+	options := new(options.FindOptions)
+
+	options.SetSkip(int64((page - 1) * limit))
+	options.SetLimit(int64(limit))
+
+	cursor, err := DBInstance.Collection(_collectionName).Find(context.Background(), bson.M{}, options)
 
 	if err != nil {
 		return err
 	}
 
-	err = cursor.All(context.Background(), &customers)
+	err = cursor.All(context.Background(), customers)
 
 	return err
 }
