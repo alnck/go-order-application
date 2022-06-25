@@ -6,10 +6,8 @@ import (
 	"log"
 	"sync"
 
-	response "customer-service/src/infrastructure/models/response"
-
-	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -19,9 +17,10 @@ const _collectionName = "customers"
 type ICustomerRepository interface {
 	Create(customer *entity.Customer) error
 	Update(customer *entity.Customer) error
-	Delete(Id uuid.UUID) error
-	GetAll() (*[]response.CustomerResponseModel, error)
-	GetById(Id uuid.UUID) error
+	Delete(Id primitive.ObjectID) error
+	GetAll(customer interface{}) error
+	GetById(Id primitive.ObjectID, customer interface{}) error
+	IsValid(Id primitive.ObjectID) (bool, error)
 }
 
 var lock sync.Mutex
@@ -48,7 +47,7 @@ func initDBInstance() {
 				log.Fatal("⛒ Connection Failed to Database")
 				log.Fatal(err)
 			}
-			DBInstance = client.Database("customes")
+			DBInstance = client.Database("customers")
 		}
 	}
 }
@@ -79,22 +78,32 @@ func (*customerRepository) Update(customer *entity.Customer) error {
 	return err
 }
 
-func (*customerRepository) Delete(Id uuid.UUID) error {
+func (*customerRepository) Delete(Id primitive.ObjectID) error {
 	_, err := DBInstance.Collection(_collectionName).DeleteOne(context.Background(), bson.M{"_id": Id})
 
 	return err
 }
 
-func (*customerRepository) GetAll() (*[]response.CustomerResponseModel, error) {
-	var customers *[]response.CustomerResponseModel
-
+func (*customerRepository) GetAll(customers interface{}) error {
 	cursor, err := DBInstance.Collection(_collectionName).Find(context.Background(), bson.M{})
-	cursor.All(context.Background(), customers)
 
-	return customers, err
+	if err != nil {
+		return err
+	}
+
+	err = cursor.All(context.Background(), &customers)
+
+	return err
 }
 
-func (*customerRepository) GetById(Id uuid.UUID) error {
-	var customer *response.CustomerResponseModel
-	return DBInstance.Collection(_collectionName).FindOne(context.Background(), bson.M{"_id": Id}).Decode(customer)
+func (*customerRepository) GetById(Id primitive.ObjectID, customer interface{}) error {
+
+	err := DBInstance.Collection(_collectionName).FindOne(context.Background(), bson.M{"_id": Id}).Decode(customer)
+	return err
+}
+
+func (*customerRepository) IsValid(Id primitive.ObjectID) (bool, error) {
+	count, err := DBInstance.Collection(_collectionName).CountDocuments(context.Background(), bson.M{"_id": Id})
+	check := count > 0
+	return check, err
 }

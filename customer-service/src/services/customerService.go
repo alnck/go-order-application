@@ -2,54 +2,72 @@ package services
 
 import (
 	"customer-service/src/domain/entity"
+	"customer-service/src/domain/repository"
 	request "customer-service/src/infrastructure/models/request"
-	response "customer-service/src/infrastructure/models/response"
-	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func CreateCustomer(requestModel request.CreateCustomerRequestModel) error {
+type (
+	ICustomerService interface {
+		Create(requestModel request.CreateCustomerRequestModel) error
+		Update(requestModel request.UpdateCustonerRequestModel) error
+		Delete(id primitive.ObjectID) error
+		GetById(id primitive.ObjectID) (entity.Customer, error)
+		GetAll() ([]entity.Customer, error)
+		IsValid(id primitive.ObjectID) (bool, error)
+	}
+	customerService struct {
+		Repository repository.ICustomerRepository
+	}
+)
+
+func NewCustomerService(repository repository.ICustomerRepository) ICustomerService {
+	return &customerService{Repository: repository}
+}
+
+func (service customerService) Create(requestModel request.CreateCustomerRequestModel) error {
 	model := entity.Customer{
-		Id:        uuid.New(),
 		Name:      requestModel.Name,
 		Email:     requestModel.Email,
 		Address:   requestModel.Address,
 		CreatedAt: time.Now().UTC(),
 	}
-	fmt.Print(model)
-	//Todo  go repository
-	return nil
+	err := service.Repository.Create(&model)
+	return err
 }
 
-func UpdateCustomer(requestModel request.UpdateCustonerRequestModel) error {
+func (service customerService) Update(requestModel request.UpdateCustonerRequestModel) error {
 	model := entity.Customer{
+		Id:        requestModel.Id,
 		Name:      requestModel.Name,
 		Email:     requestModel.Email,
 		Address:   requestModel.Address,
 		UpdatedAt: time.Now().UTC(),
 	}
-	fmt.Print(model)
-	return nil
+	err := service.Repository.Update(&model)
+	return err
 }
 
-func DeleteCustomer(id uuid.UUID) error {
-
-	return nil
+func (service customerService) Delete(id primitive.ObjectID) error {
+	err := service.Repository.Delete(id)
+	return err
 }
 
-func GetCustomer(id uuid.UUID) (response.CustomerResponseModel, error) {
-
-	return response.CustomerResponseModel{}, nil
+func (service customerService) GetById(id primitive.ObjectID) (entity.Customer, error) {
+	var customer entity.Customer
+	err := service.Repository.GetById(id, &customer)
+	return customer, err
 }
 
-func GetAllCustomer() ([]response.CustomerResponseModel, error) {
-
-	return []response.CustomerResponseModel{}, nil
+func (service customerService) GetAll() ([]entity.Customer, error) {
+	var customers []entity.Customer
+	err := service.Repository.GetAll(&customers)
+	return customers, err
 }
 
-func ValidationCheckCustomer(id uuid.UUID) error {
-
-	return nil
+func (service customerService) IsValid(id primitive.ObjectID) (bool, error) {
+	isCheck, err := service.Repository.IsValid(id)
+	return isCheck, err
 }

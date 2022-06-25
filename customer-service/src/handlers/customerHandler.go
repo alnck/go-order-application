@@ -6,26 +6,25 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func CreateCustomer(w http.ResponseWriter, r *http.Request) {
+func Create(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
 	var model request.CreateCustomerRequestModel
 	err := json.NewDecoder(r.Body).Decode(&model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
-
-	err = services.CreateCustomer(model)
+	err = service.Create(model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
-	JSON(w, http.StatusCreated, nil)
+	JSON(w, http.StatusOK, nil)
 }
 
-func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
+func Update(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
 	var model request.UpdateCustonerRequestModel
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode((&model))
@@ -33,47 +32,47 @@ func UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 	//Todo go services valid
-	err = services.UpdateCustomer(model)
+	err = service.Update(model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 	JSON(w, http.StatusOK, nil)
 }
 
-func DeleteCustomer(w http.ResponseWriter, r *http.Request) {
+func Delete(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
 	vars := mux.Vars(r)
 	customerId := vars["id"]
 
-	id, err := uuid.Parse(customerId)
+	id, err := primitive.ObjectIDFromHex(customerId)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
 	//Todo go services valid
-	services.DeleteCustomer(id)
+	service.Delete(id)
 
 	JSON(w, http.StatusOK, nil)
 }
 
-func GetCustomer(w http.ResponseWriter, r *http.Request) {
+func Get(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
 	vars := mux.Vars(r)
 	customerId := vars["id"]
 
-	id, err := uuid.Parse(customerId)
+	id, err := primitive.ObjectIDFromHex(customerId)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
 	//Todo go services valid
-	responseModel, err := services.GetCustomer(id)
+	responseModel, err := service.GetById(id)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 	JSON(w, http.StatusOK, responseModel)
 }
 
-func GetAllCustomer(w http.ResponseWriter, r *http.Request) {
-	responseModel, err := services.GetAllCustomer()
+func GetAll(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
+	responseModel, err := service.GetAll()
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
@@ -81,20 +80,21 @@ func GetAllCustomer(w http.ResponseWriter, r *http.Request) {
 	JSON(w, http.StatusOK, responseModel)
 }
 
-func ValidationCheckCustomer(w http.ResponseWriter, r *http.Request) {
+func Validate(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
 	vars := mux.Vars(r)
 	customerId := vars["id"]
 
-	id, err := uuid.Parse(customerId)
+	id, err := primitive.ObjectIDFromHex(customerId)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
-
 	//Todo go services valid
-	err = services.ValidationCheckCustomer(id)
+	isValid, err := service.IsValid(id)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
-
-	JSON(w, http.StatusOK, nil)
+	if isValid {
+		JSON(w, http.StatusOK, nil)
+	}
+	JSON(w, http.StatusBadRequest, nil)
 }
