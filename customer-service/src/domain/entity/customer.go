@@ -8,10 +8,10 @@ import (
 )
 
 type Customer struct {
-	Id        uuid.UUID
-	Name      string
-	Email     string
-	Address   valueObject.Address
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Id        uuid.UUID           `bson:"Id"`
+	Name      string              `bson:"Name"`
+	Email     string              `bson:"Email"`
+	Address   valueObject.Address `bson:"Address"`
+	CreatedAt time.Time           `bson:"CreatedAt"`
+	UpdatedAt time.Time           `bson:"UpdatedAt"`
 }
