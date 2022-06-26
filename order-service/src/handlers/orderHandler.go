@@ -6,6 +6,7 @@ import (
 	"order-service/src/infrastructure/interfaces"
 	request "order-service/src/infrastructure/models/request"
 	response "order-service/src/infrastructure/models/response"
+	"order-service/src/services"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -17,6 +18,12 @@ func Create(w http.ResponseWriter, r *http.Request, service interfaces.IOrderSer
 	err := json.NewDecoder(r.Body).Decode(&model)
 	if err != nil {
 		JSON(w, http.StatusBadRequest, false, nil, err.Error())
+		return
+	}
+
+	isValidCustomer := services.CustomerIsValid(model.CustomerId)
+	if !isValidCustomer {
+		JSON(w, http.StatusBadRequest, isValidCustomer, nil, "Customer is not valid")
 		return
 	}
 
