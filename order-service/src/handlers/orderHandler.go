@@ -16,17 +16,17 @@ func Create(w http.ResponseWriter, r *http.Request, service interfaces.IOrderSer
 	var model request.CreateOrderRequestModel
 	err := json.NewDecoder(r.Body).Decode(&model)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	result, err := service.Create(model)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSONHttpOK(w, response.IdResponseModel{Id: result})
+	JSON(w, http.StatusOK, true, response.IdResponseModel{Id: result}, "")
 }
 
 func Update(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
@@ -34,17 +34,17 @@ func Update(w http.ResponseWriter, r *http.Request, service interfaces.IOrderSer
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode((&model))
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	result, err := service.Update(model)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSON(w, result, nil)
+	JSON(w, http.StatusOK, result, nil, "")
 }
 
 func Delete(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
@@ -53,17 +53,17 @@ func Delete(w http.ResponseWriter, r *http.Request, service interfaces.IOrderSer
 
 	id, err := primitive.ObjectIDFromHex(orderId)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	result, err := service.Delete(id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSON(w, result, nil)
+	JSON(w, http.StatusOK, result, nil, "")
 }
 
 func Get(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
@@ -72,17 +72,17 @@ func Get(w http.ResponseWriter, r *http.Request, service interfaces.IOrderServic
 
 	id, err := primitive.ObjectIDFromHex(orderId)
 	if err != nil {
-		Error(w, http.StatusBadRequest, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	responseModel, err := service.GetById(id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSONHttpOK(w, responseModel)
+	JSON(w, http.StatusOK, true, responseModel, "")
 }
 
 func GetAll(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
@@ -97,11 +97,11 @@ func GetAll(w http.ResponseWriter, r *http.Request, service interfaces.IOrderSer
 
 	responseModel, err := service.GetAll(page, limit)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSONHttpOK(w, responseModel)
+	JSON(w, http.StatusOK, true, responseModel, "")
 }
 
 func GetByCustomerId(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
@@ -119,17 +119,17 @@ func GetByCustomerId(w http.ResponseWriter, r *http.Request, service interfaces.
 
 	id, err := primitive.ObjectIDFromHex(customerid)
 	if err != nil {
-		Error(w, http.StatusBadRequest, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	responseModel, err := service.GetByCustomerId(page, limit, id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSONHttpOK(w, responseModel)
+	JSON(w, http.StatusOK, true, responseModel, "")
 }
 
 func ChangeStatus(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
@@ -138,20 +138,20 @@ func ChangeStatus(w http.ResponseWriter, r *http.Request, service interfaces.IOr
 
 	id, err := primitive.ObjectIDFromHex(orderId)
 	if err != nil {
-		Error(w, http.StatusBadRequest, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 	}
 
 	status := r.URL.Query().Get("status")
 	if len(status) < 1 {
-		Error(w, http.StatusBadRequest, nil, "status is required")
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	result, err := service.ChangeStatus(id, status)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSON(w, result, nil)
+	JSON(w, http.StatusOK, result, nil, "")
 }
