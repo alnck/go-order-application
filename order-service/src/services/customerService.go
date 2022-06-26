@@ -9,7 +9,7 @@ import (
 )
 
 func CustomerIsValid(id primitive.ObjectID) bool {
-	resp, err := http.Get("http://localhost:5001/validate/" + id.Hex())
+	resp, err := http.Get("http://c_customer-service:5001/validate/" + id.Hex())
 
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return false
