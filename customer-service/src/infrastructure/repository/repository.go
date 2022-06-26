@@ -85,7 +85,7 @@ func (*customerRepository) Update(customer *entity.Customer) (bool, error) {
 		return false, err
 	}
 
-	return result.UpsertedCount > 0, nil
+	return result.ModifiedCount > 0, nil
 }
 
 func (*customerRepository) Delete(Id primitive.ObjectID) (bool, error) {
@@ -112,15 +112,15 @@ func (*customerRepository) GetAll(page int, limit int) ([]entity.Customer, error
 
 	var customer []entity.Customer
 
-	err = cursor.All(context.Background(), customer)
+	err = cursor.All(context.Background(), &customer)
 
-	return nil, err
+	return customer, err
 }
 
 func (*customerRepository) GetById(Id primitive.ObjectID) (entity.Customer, error) {
 	var customer entity.Customer
 
-	err := DBInstance.Collection(_collectionName).FindOne(context.Background(), bson.M{"_id": Id}).Decode(customer)
+	err := DBInstance.Collection(_collectionName).FindOne(context.Background(), bson.M{"_id": Id}).Decode(&customer)
 
 	return customer, err
 }

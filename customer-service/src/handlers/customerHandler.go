@@ -17,11 +17,13 @@ func Create(w http.ResponseWriter, r *http.Request, service interfaces.ICustomer
 	err := json.NewDecoder(r.Body).Decode(&model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
+		return
 	}
 
 	result, err := service.Create(model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
+		return
 	}
 
 	JSONHttpOK(w, response.IdResponseModel{Id: result})
@@ -33,11 +35,13 @@ func Update(w http.ResponseWriter, r *http.Request, service interfaces.ICustomer
 	err := decoder.Decode((&model))
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
+		return
 	}
 
 	result, err := service.Update(model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
+		return
 	}
 
 	JSON(w, result, nil)
@@ -50,11 +54,13 @@ func Delete(w http.ResponseWriter, r *http.Request, service interfaces.ICustomer
 	id, err := primitive.ObjectIDFromHex(customerId)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
+		return
 	}
 
 	result, err := service.Delete(id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, err, err.Error())
+		Error(w, http.StatusBadRequest, err, err.Error())
+		return
 	}
 
 	JSON(w, result, nil)
@@ -67,11 +73,13 @@ func Get(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerSer
 	id, err := primitive.ObjectIDFromHex(customerId)
 	if err != nil {
 		Error(w, http.StatusBadRequest, err, err.Error())
+		return
 	}
 
 	responseModel, err := service.GetById(id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, err, err.Error())
+		Error(w, http.StatusBadRequest, err, err.Error())
+		return
 	}
 
 	JSONHttpOK(w, responseModel)
@@ -89,7 +97,8 @@ func GetAll(w http.ResponseWriter, r *http.Request, service interfaces.ICustomer
 
 	responseModel, err := service.GetAll(page, limit)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, err, err.Error())
+		Error(w, http.StatusBadRequest, err, err.Error())
+		return
 	}
 
 	JSONHttpOK(w, responseModel)
@@ -102,11 +111,13 @@ func Validate(w http.ResponseWriter, r *http.Request, service interfaces.ICustom
 	id, err := primitive.ObjectIDFromHex(customerId)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
+		return
 	}
 
 	isValid, err := service.IsValid(id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, err, err.Error())
+		Error(w, http.StatusBadRequest, err, err.Error())
+		return
 	}
 
 	JSON(w, isValid, nil)
