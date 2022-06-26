@@ -6,32 +6,37 @@ import (
 	"net/http"
 )
 
-func Error(w http.ResponseWriter, code int, err error, msg string) {
-	e := &response.ErrorResponseModel{
-		Message: msg,
-		Error:   err,
+func JSON(w http.ResponseWriter, code int, success bool, src interface{}, errmsg string) {
+	var responseModel = &response.ResponseModelwithData{
+		Data:    src,
+		Success: success,
+		Message: errmsg,
 	}
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	Respond(w, code, e)
-}
 
-func JSON(w http.ResponseWriter, success bool, src interface{}) {
 	if success {
-		JSONHttpOK(w, src)
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		Respond(w, code, responseModel)
 		return
 	}
 
-	JSONHttpBadRequest(w, src)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	Respond(w, code, responseModel)
 }
 
-func JSONHttpOK(w http.ResponseWriter, src interface{}) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	Respond(w, http.StatusOK, src)
-}
+func JSONWithoutData(w http.ResponseWriter, code int, success bool, errmsg string) {
+	var responseModel = &response.BasicResponseModel{
+		Success: success,
+		Message: errmsg,
+	}
 
-func JSONHttpBadRequest(w http.ResponseWriter, src interface{}) {
+	if success {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		Respond(w, code, responseModel)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	Respond(w, http.StatusBadRequest, src)
+	Respond(w, code, responseModel)
 }
 
 func Respond(w http.ResponseWriter, code int, src interface{}) {
@@ -47,7 +52,7 @@ func Respond(w http.ResponseWriter, code int, src interface{}) {
 	switch s := src.(type) {
 	case []byte:
 		if !json.Valid(s) {
-			Error(w, http.StatusInternalServerError, err, "invalid json")
+			JSON(w, http.StatusInternalServerError, false, nil, "invalid json")
 			return
 		}
 		body = s
@@ -63,7 +68,7 @@ func Respond(w http.ResponseWriter, code int, src interface{}) {
 		}
 	default:
 		if body, err = json.Marshal(src); err != nil {
-			Error(w, http.StatusInternalServerError, err, "failed to parse json")
+			JSON(w, http.StatusInternalServerError, false, nil, "invalid json")
 			return
 		}
 	}

@@ -16,17 +16,17 @@ func Create(w http.ResponseWriter, r *http.Request, service interfaces.ICustomer
 	var model request.CreateCustomerRequestModel
 	err := json.NewDecoder(r.Body).Decode(&model)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	result, err := service.Create(model)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSONHttpOK(w, response.IdResponseModel{Id: result})
+	JSON(w, http.StatusOK, true, response.IdResponseModel{Id: result}, "")
 }
 
 func Update(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
@@ -34,17 +34,17 @@ func Update(w http.ResponseWriter, r *http.Request, service interfaces.ICustomer
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode((&model))
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	result, err := service.Update(model)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSON(w, result, nil)
+	JSON(w, http.StatusOK, result, nil, "")
 }
 
 func Delete(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
@@ -53,17 +53,17 @@ func Delete(w http.ResponseWriter, r *http.Request, service interfaces.ICustomer
 
 	id, err := primitive.ObjectIDFromHex(customerId)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	result, err := service.Delete(id)
 	if err != nil {
-		Error(w, http.StatusBadRequest, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSON(w, result, nil)
+	JSON(w, http.StatusOK, result, nil, "")
 }
 
 func Get(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
@@ -72,17 +72,17 @@ func Get(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerSer
 
 	id, err := primitive.ObjectIDFromHex(customerId)
 	if err != nil {
-		Error(w, http.StatusBadRequest, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	responseModel, err := service.GetById(id)
 	if err != nil {
-		Error(w, http.StatusBadRequest, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSONHttpOK(w, responseModel)
+	JSON(w, http.StatusOK, true, responseModel, "")
 }
 
 func GetAll(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
@@ -97,11 +97,11 @@ func GetAll(w http.ResponseWriter, r *http.Request, service interfaces.ICustomer
 
 	responseModel, err := service.GetAll(page, limit)
 	if err != nil {
-		Error(w, http.StatusBadRequest, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSONHttpOK(w, responseModel)
+	JSON(w, http.StatusOK, true, responseModel, "")
 }
 
 func Validate(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
@@ -110,15 +110,15 @@ func Validate(w http.ResponseWriter, r *http.Request, service interfaces.ICustom
 
 	id, err := primitive.ObjectIDFromHex(customerId)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
 	isValid, err := service.IsValid(id)
 	if err != nil {
-		Error(w, http.StatusBadRequest, err, err.Error())
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
 	}
 
-	JSON(w, isValid, nil)
+	JSON(w, http.StatusOK, isValid, nil, "")
 }
