@@ -68,7 +68,7 @@ func (service OrderService) GetAll(page int, limit int) ([]entity.Order, error) 
 }
 
 func (service OrderService) GetByCustomerId(page int, limit int, customerId primitive.ObjectID) ([]entity.Order, error) {
-	return service.Repository.GetAllByFilter(page, limit, bson.M{"CustomerId": customerId})
+	return service.Repository.GetAllByFilter(page, limit, bson.M{"Custtomer_id": customerId})
 }
 
 func (service OrderService) ChangeStatus(id primitive.ObjectID, status string) (bool, error) {

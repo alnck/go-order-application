@@ -89,7 +89,7 @@ func (*orderRepository) Update(order *entity.Order) (bool, error) {
 		return false, err
 	}
 
-	return result.UpsertedCount > 0, nil
+	return result.ModifiedCount > 0, nil
 }
 
 func (*orderRepository) Delete(Id primitive.ObjectID) (bool, error) {
@@ -116,7 +116,7 @@ func (*orderRepository) GetAllByFilter(page int, limit int, filter map[string]in
 
 	var orders []entity.Order
 
-	err = cursor.All(context.Background(), orders)
+	err = cursor.All(context.Background(), &orders)
 
 	return orders, err
 }
@@ -124,7 +124,7 @@ func (*orderRepository) GetAllByFilter(page int, limit int, filter map[string]in
 func (*orderRepository) GetById(Id primitive.ObjectID) (entity.Order, error) {
 	var order entity.Order
 
-	err := DBInstance.Collection(_collectionName).FindOne(context.Background(), bson.M{"_id": Id}).Decode(order)
+	err := DBInstance.Collection(_collectionName).FindOne(context.Background(), bson.M{"_id": Id}).Decode(&order)
 
 	return order, err
 }
@@ -147,5 +147,5 @@ func (*orderRepository) UpdateStatus(id primitive.ObjectID, status string) (bool
 		return false, err
 	}
 
-	return result.UpsertedCount > 0, nil
+	return result.ModifiedCount > 0, nil
 }

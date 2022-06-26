@@ -8,8 +8,8 @@ import (
 )
 
 type UpdateOrderRequestModel struct {
-	Id         primitive.ObjectID  `json:"_id"`
-	CustomerId primitive.ObjectID  `json:"Custtomer_id"`
+	Id         primitive.ObjectID  `json:"Id"`
+	CustomerId primitive.ObjectID  `json:"CusttomerId"`
 	Quantity   int                 `json:"Quantity"`
 	Price      float64             `json:"Price"`
 	Name       string              `json:"Name"`

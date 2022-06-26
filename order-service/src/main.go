@@ -22,6 +22,10 @@ func main() {
 		handlers.Get(w, r, orderService)
 	}).Methods(http.MethodGet)
 
+	router.HandleFunc("/GetByCustomerId/{id}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetByCustomerId(w, r, orderService)
+	}).Methods(http.MethodGet)
+
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Create(w, r, orderService)
 	}).Methods(http.MethodPost)
