@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"order-service/src/domain/entity"
+	"order-service/src/infrastructure/interfaces"
 	"sync"
 	"time"
 
@@ -14,14 +15,6 @@ import (
 )
 
 const _collectionName = "orders"
-
-type IOrderRepository interface {
-	Create(order *entity.Order) error
-	Update(order *entity.Order) error
-	Delete(Id primitive.ObjectID) error
-	GetAll(order interface{}, page int, limit int) error
-	GetById(Id primitive.ObjectID, order interface{}) error
-}
 
 var lock sync.Mutex
 
@@ -47,71 +40,112 @@ func initDBInstance() {
 				log.Fatal("⛒ Connection Failed to Database")
 				log.Fatal(err)
 			}
-			DBInstance = client.Database("orders")
+			DBInstance = client.Database("orderDB")
 		}
 	}
 }
 
-func NewOrderRepository() IOrderRepository {
+func NewOrderRepository() interfaces.IOrderRepository {
 	initDBInstance()
 
 	return &orderRepository{}
 }
 
-func (*orderRepository) Create(order *entity.Order) error {
-	_, err := DBInstance.Collection(_collectionName).
+func (*orderRepository) Create(order *entity.Order) (interface{}, error) {
+	result, err := DBInstance.Collection(_collectionName).
 		InsertOne(
 			context.Background(),
 			&order,
 			options.InsertOne())
 
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	return result.InsertedID, nil
 }
 
-func (*orderRepository) Update(order *entity.Order) error {
-
+func (*orderRepository) Update(order *entity.Order) (bool, error) {
 	updateDocument := bson.M{
 		"$set": bson.M{
-			"Name":      order.Name,
-			"Email":     order.Email,
-			"Address":   order.Address,
-			"UpdatedAt": time.Now().UTC(),
+			"CustomerId": order.CustomerId,
+			"Quantity":   order.Quantity,
+			"Price":      order.Price,
+			"Name":       order.Name,
+			"Email":      order.Email,
+			"Address":    order.Address,
+			"Product":    order.Product,
+			"UpdatedAt":  time.Now().UTC(),
 		},
 	}
-	_, err := DBInstance.Collection(_collectionName).
+
+	result, err := DBInstance.Collection(_collectionName).
 		UpdateOne(
 			context.Background(),
 			bson.M{"_id": order.Id},
 			updateDocument)
 
-	return err
+	if err != nil {
+		return false, err
+	}
+
+	return result.UpsertedCount > 0, nil
 }
 
-func (*orderRepository) Delete(Id primitive.ObjectID) error {
-	_, err := DBInstance.Collection(_collectionName).DeleteOne(context.Background(), bson.M{"_id": Id})
+func (*orderRepository) Delete(Id primitive.ObjectID) (bool, error) {
+	result, err := DBInstance.Collection(_collectionName).DeleteOne(context.Background(), bson.M{"_id": Id})
 
-	return err
+	if err != nil {
+		return false, err
+	}
+
+	return result.DeletedCount > 0, nil
 }
 
-func (*orderRepository) GetAll(orders interface{}, page int, limit int) error {
+func (*orderRepository) GetAllByFilter(page int, limit int, filter map[string]interface{}) ([]entity.Order, error) {
 	options := new(options.FindOptions)
 
 	options.SetSkip(int64((page - 1) * limit))
 	options.SetLimit(int64(limit))
 
-	cursor, err := DBInstance.Collection(_collectionName).Find(context.Background(), bson.M{}, options)
+	cursor, err := DBInstance.Collection(_collectionName).Find(context.Background(), filter, options)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	var orders []entity.Order
 
 	err = cursor.All(context.Background(), orders)
 
-	return err
+	return orders, err
 }
 
-func (*orderRepository) GetById(Id primitive.ObjectID, order interface{}) error {
+func (*orderRepository) GetById(Id primitive.ObjectID) (entity.Order, error) {
+	var order entity.Order
 
 	err := DBInstance.Collection(_collectionName).FindOne(context.Background(), bson.M{"_id": Id}).Decode(order)
-	return err
+
+	return order, err
+}
+
+func (*orderRepository) UpdateStatus(id primitive.ObjectID, status string) (bool, error) {
+	updateDocument := bson.M{
+		"$set": bson.M{
+			"Status":    status,
+			"UpdatedAt": time.Now().UTC(),
+		},
+	}
+
+	result, err := DBInstance.Collection(_collectionName).
+		UpdateOne(
+			context.Background(),
+			bson.M{"_id": id},
+			updateDocument)
+
+	if err != nil {
+		return false, err
+	}
+
+	return result.UpsertedCount > 0, nil
 }

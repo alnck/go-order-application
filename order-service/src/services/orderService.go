@@ -2,32 +2,23 @@ package services
 
 import (
 	"order-service/src/domain/entity"
+	"order-service/src/infrastructure/interfaces"
 	request "order-service/src/infrastructure/models/request"
-	"order-service/src/infrastructure/repository"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type (
-	IOrderService interface {
-		Create(requestModel request.CreateOrderRequestModel) error
-		Update(requestModel request.UpdateOrderRequestModel) error
-		Delete(id primitive.ObjectID) error
-		GetById(id primitive.ObjectID) (entity.Order, error)
-		GetAll(page int, limit int) ([]entity.Order, error)
-		ChangeStatus(id primitive.ObjectID, status string) error
-	}
-	OrderService struct {
-		Repository repository.IOrderRepository
-	}
-)
+type OrderService struct {
+	Repository interfaces.IOrderRepository
+}
 
-func NewOrderService(repository repository.IOrderRepository) IOrderService {
+func NewOrderService(repository interfaces.IOrderRepository) interfaces.IOrderService {
 	return &OrderService{Repository: repository}
 }
 
-func (service OrderService) Create(requestModel request.CreateOrderRequestModel) error {
+func (service OrderService) Create(requestModel request.CreateOrderRequestModel) (interface{}, error) {
 	model := entity.Order{
 		Id:         primitive.NewObjectID(),
 		CustomerId: requestModel.CustomerId,
@@ -44,11 +35,11 @@ func (service OrderService) Create(requestModel request.CreateOrderRequestModel)
 		},
 		UpdatedAt: time.Now().UTC(),
 	}
-	err := service.Repository.Create(&model)
-	return err
+
+	return service.Repository.Create(&model)
 }
 
-func (service OrderService) Update(requestModel request.UpdateOrderRequestModel) error {
+func (service OrderService) Update(requestModel request.UpdateOrderRequestModel) (bool, error) {
 	model := entity.Order{
 		Id:         requestModel.Id,
 		CustomerId: requestModel.CustomerId,
@@ -60,33 +51,26 @@ func (service OrderService) Update(requestModel request.UpdateOrderRequestModel)
 		Product:    requestModel.Product,
 		UpdatedAt:  time.Now().UTC(),
 	}
-	err := service.Repository.Update(&model)
-	return err
+
+	return service.Repository.Update(&model)
 }
 
-func (service OrderService) Delete(id primitive.ObjectID) error {
-	err := service.Repository.Delete(id)
-	return err
+func (service OrderService) Delete(id primitive.ObjectID) (bool, error) {
+	return service.Repository.Delete(id)
 }
 
 func (service OrderService) GetById(id primitive.ObjectID) (entity.Order, error) {
-	var order entity.Order
-	err := service.Repository.GetById(id, &order)
-	return order, err
+	return service.Repository.GetById(id)
 }
 
 func (service OrderService) GetAll(page int, limit int) ([]entity.Order, error) {
-	var orders []entity.Order
-	err := service.Repository.GetAll(&orders, page, limit)
-	return orders, err
+	return service.Repository.GetAllByFilter(page, limit, bson.M{})
 }
 
-func (service OrderService) ChangeStatus(id primitive.ObjectID, status string) error {
-	model := entity.Order{
-		Id:        id,
-		Status:    status,
-		UpdatedAt: time.Now().UTC(),
-	}
-	err := service.Repository.Update(&model)
-	return err
+func (service OrderService) GetByCustomerId(page int, limit int, customerId primitive.ObjectID) ([]entity.Order, error) {
+	return service.Repository.GetAllByFilter(page, limit, bson.M{"CustomerId": customerId})
+}
+
+func (service OrderService) ChangeStatus(id primitive.ObjectID, status string) (bool, error) {
+	return service.Repository.UpdateStatus(id, status)
 }

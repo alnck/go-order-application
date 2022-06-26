@@ -3,30 +3,31 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"order-service/src/infrastructure/interfaces"
 	request "order-service/src/infrastructure/models/request"
-	"order-service/src/services"
+	response "order-service/src/infrastructure/models/response"
 	"strconv"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Create(w http.ResponseWriter, r *http.Request, service services.IOrderService) {
+func Create(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
 	var model request.CreateOrderRequestModel
 	err := json.NewDecoder(r.Body).Decode(&model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
-	err = service.Create(model)
+	result, err := service.Create(model)
 	if err != nil {
-		Error(w, http.StatusNotFound, err, err.Error())
+		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
 
-	JSON(w, http.StatusOK, nil)
+	JSONHttpOK(w, response.IdResponseModel{Id: result})
 }
 
-func Update(w http.ResponseWriter, r *http.Request, service services.IOrderService) {
+func Update(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
 	var model request.UpdateOrderRequestModel
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode((&model))
@@ -34,14 +35,15 @@ func Update(w http.ResponseWriter, r *http.Request, service services.IOrderServi
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
-	err = service.Update(model)
+	result, err := service.Update(model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
-	JSON(w, http.StatusOK, nil)
+
+	JSON(w, result, nil)
 }
 
-func Delete(w http.ResponseWriter, r *http.Request, service services.IOrderService) {
+func Delete(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
 	vars := mux.Vars(r)
 	orderId := vars["id"]
 
@@ -50,15 +52,15 @@ func Delete(w http.ResponseWriter, r *http.Request, service services.IOrderServi
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
-	err = service.Delete(id)
+	result, err := service.Delete(id)
 	if err != nil {
 		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
 
-	JSON(w, http.StatusOK, nil)
+	JSON(w, result, nil)
 }
 
-func Get(w http.ResponseWriter, r *http.Request, service services.IOrderService) {
+func Get(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
 	vars := mux.Vars(r)
 	orderId := vars["id"]
 
@@ -71,10 +73,11 @@ func Get(w http.ResponseWriter, r *http.Request, service services.IOrderService)
 	if err != nil {
 		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
-	JSON(w, http.StatusOK, responseModel)
+
+	JSONHttpOK(w, responseModel)
 }
 
-func GetAll(w http.ResponseWriter, r *http.Request, service services.IOrderService) {
+func GetAll(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
 	page, errPage := strconv.Atoi(r.URL.Query().Get("page"))
 	if errPage != nil || page < 1 {
 		page = 1
@@ -89,10 +92,33 @@ func GetAll(w http.ResponseWriter, r *http.Request, service services.IOrderServi
 		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
 
-	JSON(w, http.StatusOK, responseModel)
+	JSONHttpOK(w, responseModel)
 }
 
-func ChangeStatus(w http.ResponseWriter, r *http.Request, service services.IOrderService) {
+func GetByCustomerId(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
+	page, errPage := strconv.Atoi(r.URL.Query().Get("page"))
+	if errPage != nil || page < 1 {
+		page = 1
+	}
+	limit, errLimit := strconv.Atoi(r.URL.Query().Get("limit"))
+	if errLimit != nil || limit < 1 {
+		limit = 10
+	}
+
+	customerid, err := primitive.ObjectIDFromHex(r.URL.Query().Get("customerid"))
+	if err != nil {
+		Error(w, http.StatusBadRequest, nil, "customerid is required")
+	}
+
+	responseModel, err := service.GetByCustomerId(page, limit, customerid)
+	if err != nil {
+		Error(w, http.StatusInternalServerError, err, err.Error())
+	}
+
+	JSONHttpOK(w, responseModel)
+}
+
+func ChangeStatus(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
 	vars := mux.Vars(r)
 	orderId := vars["id"]
 
@@ -106,9 +132,10 @@ func ChangeStatus(w http.ResponseWriter, r *http.Request, service services.IOrde
 		Error(w, http.StatusBadRequest, nil, "status is required")
 	}
 
-	err = service.ChangeStatus(id, status)
+	result, err := service.ChangeStatus(id, status)
 	if err != nil {
 		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
-	JSON(w, http.StatusOK, nil)
+
+	JSON(w, result, nil)
 }

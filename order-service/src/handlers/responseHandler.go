@@ -15,9 +15,23 @@ func Error(w http.ResponseWriter, code int, err error, msg string) {
 	Respond(w, code, e)
 }
 
-func JSON(w http.ResponseWriter, code int, src interface{}) {
+func JSON(w http.ResponseWriter, success bool, src interface{}) {
+	if success {
+		JSONHttpOK(w, src)
+		return
+	}
+
+	JSONHttpBadRequest(w, src)
+}
+
+func JSONHttpOK(w http.ResponseWriter, src interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	Respond(w, code, src)
+	Respond(w, http.StatusOK, src)
+}
+
+func JSONHttpBadRequest(w http.ResponseWriter, src interface{}) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	Respond(w, http.StatusBadRequest, src)
 }
 
 func Respond(w http.ResponseWriter, code int, src interface{}) {
