@@ -5,7 +5,7 @@ import (
 )
 
 type CreateCustomerRequestModel struct {
-	Name    string              `json:"name"`
-	Email   string              `json:"email"`
-	Address valueObject.Address `json:"address"`
+	Name    string              `json:"name" validate:"required"`
+	Email   string              `json:"email" validate:"required,email"`
+	Address valueObject.Address `json:"address" validate:"required"`
 }

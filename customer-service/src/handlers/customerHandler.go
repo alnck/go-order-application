@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -15,6 +16,13 @@ import (
 func Create(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
 	var model request.CreateCustomerRequestModel
 	err := json.NewDecoder(r.Body).Decode(&model)
+	if err != nil {
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
+		return
+	}
+
+	v := validator.New()
+	err = v.Struct(model)
 	if err != nil {
 		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
@@ -33,6 +41,13 @@ func Update(w http.ResponseWriter, r *http.Request, service interfaces.ICustomer
 	var model request.UpdateCustomerRequestModel
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode((&model))
+	if err != nil {
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
+		return
+	}
+
+	v := validator.New()
+	err = v.Struct(model)
 	if err != nil {
 		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
