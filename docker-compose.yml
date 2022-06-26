@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  orderservice.api:
+    container_name: c_order-service
+    build:
+      context: .
+      dockerfile: ./order-service/Dockerfile
+    ports:
+      - "5002:5002"
+    restart: unless-stopped
+    depends_on: 
+      - mongodb
+
+  customerservice.api:
+    container_name: c_customer-service
+    build:
+      context: .
+      dockerfile: ./customer-service/Dockerfile
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+    depends_on: 
+      - mongodb
+      
+  api.gateway:
+    container_name: c_api-gateway
+    build:
+      context: .
+      dockerfile: ./api-gateway/ApiGateway/Dockerfile
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    depends_on: 
+      - customerservice.api
+      - orderservice.api
+
+  mongodb:
+    container_name: c_mongodb
+    image: mongo
+    restart: unless-stopped
+    volumes:
+      - mongodbvolume:/data/mongodb
+    ports: 
+      - 27017:27017
+
+volumes:
+  mongodbvolume:
+    driver: local
