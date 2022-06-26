@@ -8,11 +8,11 @@ import (
 )
 
 type CreateOrderRequestModel struct {
-	CustomerId primitive.ObjectID  `json:"CusttomerId"`
-	Quantity   int                 `json:"Quantity"`
-	Price      float64             `json:"Price"`
-	Name       string              `json:"Name"`
-	Email      string              `json:"Email"`
-	Address    valueobject.Address `json:"Address"`
-	Product    entity.Product      `json:"Product"`
+	CustomerId primitive.ObjectID  `json:"CusttomerId" validate:"required"`
+	Quantity   int                 `json:"Quantity" validate:"required,min=1"`
+	Price      float64             `json:"Price" validate:"required,min=1"`
+	Name       string              `json:"Name" validate:"required"`
+	Email      string              `json:"Email" validate:"required,email"`
+	Address    valueobject.Address `json:"Address" validate:"required"`
+	Product    entity.Product      `json:"Product" validate:"required"`
 }

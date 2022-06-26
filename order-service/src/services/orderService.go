@@ -33,7 +33,7 @@ func (service OrderService) Create(requestModel request.CreateOrderRequestModel)
 			ImageUrl: requestModel.Product.ImageUrl,
 			Name:     requestModel.Product.Name,
 		},
-		UpdatedAt: time.Now().UTC(),
+		CreatedAt: time.Now().UTC(),
 	}
 
 	return service.Repository.Create(&model)

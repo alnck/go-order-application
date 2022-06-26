@@ -9,6 +9,7 @@ import (
 	"order-service/src/services"
 	"strconv"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -16,6 +17,13 @@ import (
 func Create(w http.ResponseWriter, r *http.Request, service interfaces.IOrderService) {
 	var model request.CreateOrderRequestModel
 	err := json.NewDecoder(r.Body).Decode(&model)
+	if err != nil {
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
+		return
+	}
+
+	v := validator.New()
+	err = v.Struct(model)
 	if err != nil {
 		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
@@ -40,6 +48,13 @@ func Update(w http.ResponseWriter, r *http.Request, service interfaces.IOrderSer
 	var model request.UpdateOrderRequestModel
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode((&model))
+	if err != nil {
+		JSON(w, http.StatusBadRequest, false, nil, err.Error())
+		return
+	}
+
+	v := validator.New()
+	err = v.Struct(model)
 	if err != nil {
 		JSON(w, http.StatusBadRequest, false, nil, err.Error())
 		return
