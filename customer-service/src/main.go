@@ -38,5 +38,5 @@ func main() {
 		handlers.Validate(w, r, customerService)
 	}).Methods(http.MethodGet)
 
-	log.Fatal(http.ListenAndServe(":8081", router))
+	log.Fatal(http.ListenAndServe(":5001", router))
 }

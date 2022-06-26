@@ -42,5 +42,5 @@ func main() {
 		handlers.Delete(w, r, orderService)
 	}).Methods(http.MethodDelete)
 
-	log.Fatal(http.ListenAndServe(":8082", router))
+	log.Fatal(http.ListenAndServe(":5002", router))
 }
