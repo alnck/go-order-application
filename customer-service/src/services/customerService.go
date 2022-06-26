@@ -2,32 +2,22 @@ package services
 
 import (
 	"customer-service/src/domain/entity"
+	"customer-service/src/infrastructure/interfaces"
 	request "customer-service/src/infrastructure/models/request"
-	"customer-service/src/infrastructure/repository"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type (
-	ICustomerService interface {
-		Create(requestModel request.CreateCustomerRequestModel) error
-		Update(requestModel request.UpdateCustonerRequestModel) error
-		Delete(id primitive.ObjectID) error
-		GetById(id primitive.ObjectID) (entity.Customer, error)
-		GetAll(page int, limit int) ([]entity.Customer, error)
-		IsValid(id primitive.ObjectID) (bool, error)
-	}
-	customerService struct {
-		Repository repository.ICustomerRepository
-	}
-)
+type customerService struct {
+	Repository interfaces.ICustomerRepository
+}
 
-func NewCustomerService(repository repository.ICustomerRepository) ICustomerService {
+func NewCustomerService(repository interfaces.ICustomerRepository) interfaces.ICustomerService {
 	return &customerService{Repository: repository}
 }
 
-func (service customerService) Create(requestModel request.CreateCustomerRequestModel) error {
+func (service customerService) Create(requestModel request.CreateCustomerRequestModel) (interface{}, error) {
 	model := entity.Customer{
 		Id:        primitive.NewObjectID(),
 		Name:      requestModel.Name,
@@ -35,11 +25,11 @@ func (service customerService) Create(requestModel request.CreateCustomerRequest
 		Address:   requestModel.Address,
 		CreatedAt: time.Now().UTC(),
 	}
-	err := service.Repository.Create(&model)
-	return err
+
+	return service.Repository.Create(&model)
 }
 
-func (service customerService) Update(requestModel request.UpdateCustonerRequestModel) error {
+func (service customerService) Update(requestModel request.UpdateCustomerRequestModel) (bool, error) {
 	model := entity.Customer{
 		Id:        requestModel.Id,
 		Name:      requestModel.Name,
@@ -47,28 +37,22 @@ func (service customerService) Update(requestModel request.UpdateCustonerRequest
 		Address:   requestModel.Address,
 		UpdatedAt: time.Now().UTC(),
 	}
-	err := service.Repository.Update(&model)
-	return err
+
+	return service.Repository.Update(&model)
 }
 
-func (service customerService) Delete(id primitive.ObjectID) error {
-	err := service.Repository.Delete(id)
-	return err
+func (service customerService) Delete(id primitive.ObjectID) (bool, error) {
+	return service.Repository.Delete(id)
 }
 
 func (service customerService) GetById(id primitive.ObjectID) (entity.Customer, error) {
-	var customer entity.Customer
-	err := service.Repository.GetById(id, &customer)
-	return customer, err
+	return service.Repository.GetById(id)
 }
 
 func (service customerService) GetAll(page int, limit int) ([]entity.Customer, error) {
-	var customers []entity.Customer
-	err := service.Repository.GetAll(&customers, page, limit)
-	return customers, err
+	return service.Repository.GetAll(page, limit)
 }
 
 func (service customerService) IsValid(id primitive.ObjectID) (bool, error) {
-	isCheck, err := service.Repository.IsValid(id)
-	return isCheck, err
+	return service.Repository.IsValid(id)
 }

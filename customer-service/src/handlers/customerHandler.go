@@ -1,8 +1,9 @@
 package handlers
 
 import (
+	"customer-service/src/infrastructure/interfaces"
 	request "customer-service/src/infrastructure/models/request"
-	"customer-service/src/services"
+	response "customer-service/src/infrastructure/models/response"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -11,37 +12,38 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Create(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
+func Create(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
 	var model request.CreateCustomerRequestModel
 	err := json.NewDecoder(r.Body).Decode(&model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
-	err = service.Create(model)
+	result, err := service.Create(model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
-	JSON(w, http.StatusOK, nil)
+	JSONHttpOK(w, response.IdResponseModel{Id: result})
 }
 
-func Update(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
-	var model request.UpdateCustonerRequestModel
+func Update(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
+	var model request.UpdateCustomerRequestModel
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode((&model))
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
-	err = service.Update(model)
+	result, err := service.Update(model)
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
-	JSON(w, http.StatusOK, nil)
+
+	JSON(w, result, nil)
 }
 
-func Delete(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
+func Delete(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
 	vars := mux.Vars(r)
 	customerId := vars["id"]
 
@@ -50,15 +52,15 @@ func Delete(w http.ResponseWriter, r *http.Request, service services.ICustomerSe
 		Error(w, http.StatusNotFound, err, err.Error())
 	}
 
-	err = service.Delete(id)
+	result, err := service.Delete(id)
 	if err != nil {
 		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
 
-	JSON(w, http.StatusOK, nil)
+	JSON(w, result, nil)
 }
 
-func Get(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
+func Get(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
 	vars := mux.Vars(r)
 	customerId := vars["id"]
 
@@ -71,10 +73,11 @@ func Get(w http.ResponseWriter, r *http.Request, service services.ICustomerServi
 	if err != nil {
 		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
-	JSON(w, http.StatusOK, responseModel)
+
+	JSONHttpOK(w, responseModel)
 }
 
-func GetAll(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
+func GetAll(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
 	page, errPage := strconv.Atoi(r.URL.Query().Get("page"))
 	if errPage != nil || page < 1 {
 		page = 1
@@ -89,10 +92,10 @@ func GetAll(w http.ResponseWriter, r *http.Request, service services.ICustomerSe
 		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
 
-	JSON(w, http.StatusOK, responseModel)
+	JSONHttpOK(w, responseModel)
 }
 
-func Validate(w http.ResponseWriter, r *http.Request, service services.ICustomerService) {
+func Validate(w http.ResponseWriter, r *http.Request, service interfaces.ICustomerService) {
 	vars := mux.Vars(r)
 	customerId := vars["id"]
 
@@ -105,8 +108,6 @@ func Validate(w http.ResponseWriter, r *http.Request, service services.ICustomer
 	if err != nil {
 		Error(w, http.StatusInternalServerError, err, err.Error())
 	}
-	if isValid {
-		JSON(w, http.StatusOK, nil)
-	}
-	JSON(w, http.StatusBadRequest, nil)
+
+	JSON(w, isValid, nil)
 }

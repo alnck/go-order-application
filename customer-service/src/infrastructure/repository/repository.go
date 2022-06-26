@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"customer-service/src/domain/entity"
+	"customer-service/src/infrastructure/interfaces"
 	"log"
 	"sync"
 	"time"
@@ -14,15 +15,6 @@ import (
 )
 
 const _collectionName = "customers"
-
-type ICustomerRepository interface {
-	Create(customer *entity.Customer) error
-	Update(customer *entity.Customer) error
-	Delete(Id primitive.ObjectID) error
-	GetAll(customer interface{}, page int, limit int) error
-	GetById(Id primitive.ObjectID, customer interface{}) error
-	IsValid(Id primitive.ObjectID) (bool, error)
-}
 
 var lock sync.Mutex
 
@@ -48,29 +40,32 @@ func initDBInstance() {
 				log.Fatal("⛒ Connection Failed to Database")
 				log.Fatal(err)
 			}
-			DBInstance = client.Database("customers")
+			DBInstance = client.Database("customerDB")
 		}
 	}
 }
 
-func NewCustomerRepository() ICustomerRepository {
+func NewCustomerRepository() interfaces.ICustomerRepository {
 	initDBInstance()
 
 	return &customerRepository{}
 }
 
-func (*customerRepository) Create(customer *entity.Customer) error {
-	_, err := DBInstance.Collection(_collectionName).
+func (*customerRepository) Create(customer *entity.Customer) (interface{}, error) {
+	result, err := DBInstance.Collection(_collectionName).
 		InsertOne(
 			context.Background(),
 			&customer,
 			options.InsertOne())
 
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	return result.InsertedID, nil
 }
 
-func (*customerRepository) Update(customer *entity.Customer) error {
-
+func (*customerRepository) Update(customer *entity.Customer) (bool, error) {
 	updateDocument := bson.M{
 		"$set": bson.M{
 			"Name":      customer.Name,
@@ -79,22 +74,31 @@ func (*customerRepository) Update(customer *entity.Customer) error {
 			"UpdatedAt": time.Now().UTC(),
 		},
 	}
-	_, err := DBInstance.Collection(_collectionName).
+
+	result, err := DBInstance.Collection(_collectionName).
 		UpdateOne(
 			context.Background(),
 			bson.M{"_id": customer.Id},
 			updateDocument)
 
-	return err
+	if err != nil {
+		return false, err
+	}
+
+	return result.UpsertedCount > 0, nil
 }
 
-func (*customerRepository) Delete(Id primitive.ObjectID) error {
-	_, err := DBInstance.Collection(_collectionName).DeleteOne(context.Background(), bson.M{"_id": Id})
+func (*customerRepository) Delete(Id primitive.ObjectID) (bool, error) {
+	result, err := DBInstance.Collection(_collectionName).DeleteOne(context.Background(), bson.M{"_id": Id})
 
-	return err
+	if err != nil {
+		return false, err
+	}
+
+	return result.DeletedCount > 0, nil
 }
 
-func (*customerRepository) GetAll(customers interface{}, page int, limit int) error {
+func (*customerRepository) GetAll(page int, limit int) ([]entity.Customer, error) {
 	options := new(options.FindOptions)
 
 	options.SetSkip(int64((page - 1) * limit))
@@ -103,18 +107,22 @@ func (*customerRepository) GetAll(customers interface{}, page int, limit int) er
 	cursor, err := DBInstance.Collection(_collectionName).Find(context.Background(), bson.M{}, options)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = cursor.All(context.Background(), customers)
+	var customer []entity.Customer
 
-	return err
+	err = cursor.All(context.Background(), customer)
+
+	return nil, err
 }
 
-func (*customerRepository) GetById(Id primitive.ObjectID, customer interface{}) error {
+func (*customerRepository) GetById(Id primitive.ObjectID) (entity.Customer, error) {
+	var customer entity.Customer
 
 	err := DBInstance.Collection(_collectionName).FindOne(context.Background(), bson.M{"_id": Id}).Decode(customer)
-	return err
+
+	return customer, err
 }
 
 func (*customerRepository) IsValid(Id primitive.ObjectID) (bool, error) {
