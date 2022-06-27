@@ -90,13 +90,15 @@ Veri yapısındaki alanlar aşağıdaki gibidir:
   - Şehir (City)
   - Ülke (Country)
   - Şehir Kodu (CityCode)
+- Oluşturulma Tarihi (CreatedAt)
+- Güncelleme Tarihi (UpdatedAt)
 
 #### Siparişler
 Sistemde teorik anlamda sınırsız sayıda sipariş kaydı yapılabilmektedir.
 
 Veri yapısındaki alanlar aşağıdaki gibidir:
 - UUID
-- Müşteri UUID
+- Müşteri UUID (CustormerId)
 - Miktar (Quantity)
 - Fiyat (Price)
 - Statü (Status)
@@ -109,6 +111,8 @@ Veri yapısındaki alanlar aşağıdaki gibidir:
   - UUID
   - Resim Url (ImageUrl)
   - İsim (Name)
+- Oluşturulma Tarihi (CreatedAt)
+- Güncelleme Tarihi (UpdatedAt)
 
 
 ## Teknik Detaylar
