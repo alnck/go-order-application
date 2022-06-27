@@ -82,37 +82,37 @@ Order listeleme (Order List): `curl -X 'GET' \ '[BASE_ENDPOINT]/order/{id}' \ -H
 Sistemde teorik anlamda sınırsız sayıda müşteri kaydı yapılabilmektedir.
 
 Veri yapısındaki alanlar aşağıdaki gibidir:
-- UUID
-- Ad (Name)
-- Mail (Email)
-- Adres Bilgisi (Address)
-  - Adres (AddressLine)
-  - Şehir (City)
-  - Ülke (Country)
-  - Şehir Kodu (CityCode)
-- Oluşturulma Tarihi (CreatedAt)
-- Güncelleme Tarihi (UpdatedAt)
+- UUID: "required"
+- Name: "required"
+- Email: "required"
+- Address: "required"
+  - AddressLine:
+  - City: "required"
+  - Country: "required"
+  - CityCode: "required"
+- CreatedAt: "required"
+- UpdatedAt: "required"
 
 #### Siparişler
 Sistemde teorik anlamda sınırsız sayıda sipariş kaydı yapılabilmektedir.
 
 Veri yapısındaki alanlar aşağıdaki gibidir:
-- UUID
-- Müşteri UUID (CustormerId)
-- Miktar (Quantity)
-- Fiyat (Price)
-- Statü (Status)
-- Adres Bilgisi (Address)
-  - Adres (AddressLine)
-  - Şehir (City)
-  - Ülke (Country)
-  - Şehir Kodu (CityCode)
-- Ürün (Product)
-  - UUID
-  - Resim Url (ImageUrl)
-  - İsim (Name)
-- Oluşturulma Tarihi (CreatedAt)
-- Güncelleme Tarihi (UpdatedAt)
+- UUID: "required"
+- CustormerId: "required"
+- Quantity: "required"
+- Price: "required"
+- Status: "required"
+- Address: "required"
+  - AddressLine:
+  - City: "required"
+  - Country: "required"
+  - CityCode: "required"
+- Product: "required"
+  - UUID: "required"
+  - ImageUrl: "required"
+  - Name: "required"
+- CreatedAt: "required"
+- UpdatedAt: "required"
 
 
 ## Teknik Detaylar
