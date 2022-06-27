@@ -25,7 +25,7 @@ API Base Endpoint (BASE_ENPOINT): `http://localhost:5000/`
 
 - **Örnekler curl ile (Examples with curl)**
 
-Kullanıcı listeleme (Customer List): `curl -X 'GET' \ '[BASE_ENDPOINT]/customer' \ -H 'accept: text/plain'`
+Kullanıcı listeleme (Customer List): `curl -X 'GET' \ '[BASE_ENDPOINT]/customer?page=1&limit=10' \ -H 'accept: text/plain'`
 
 Kullanıcı oluşturma (Create Customer): `curl -X 'POST' \
   '[BASE_ENDPOINT]/customer' \
@@ -52,7 +52,7 @@ Kullanıcı sil (Delete Customer): `curl -X 'DELETE' \
   -H 'accept: */*'
 `
 
-### Report Endpoints
+### Order Endpoints
 
 `[HttpGET] [BASE_ENDPOINT]/order`
 
@@ -71,7 +71,7 @@ Kullanıcı sil (Delete Customer): `curl -X 'DELETE' \
 
 - **Örnekler curl ile (Examples with curl)**
 
-Order listeleme (Order List): `curl -X 'GET' \ '[BASE_ENDPOINT]/order' \ -H 'accept: text/plain'`
+Order listeleme (Order List): `curl -X 'GET' \ '[BASE_ENDPOINT]/order?page=1&limit=10' \ -H 'accept: text/plain'`
 
 Order Oluşturma (Create Order): `curl -X 'POST' \ '[BASE_ENDPOINT]/order' \ -H 'accept: text/plain' \ -d ''`
 
@@ -109,12 +109,6 @@ Veri yapısındaki alanlar aşağıdaki gibidir:
   - UUID
   - Resim Url (ImageUrl)
   - İsim (Name)
-
-Rapor basitçe aşağıdaki bilgileri içermektedir:
-
-- Konum Bilgisi
-- konumda yer alan rehbere kayıtlı kişi sayısı
-- konumda yer alan rehbere kayıtlı telefon numarası sayısı
 
 
 ## Teknik Detaylar
