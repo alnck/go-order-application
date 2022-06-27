@@ -1,5 +1,5 @@
 # Order Application
-Birbirleri ile haberleşen minimum iki microservice'in olduğu bir yapıdır. Kullanıcı (customer) ve satışlara (order) göre raporlanma oluşturulması hedeflenmiştir. 
+Birbirleri ile haberleşen minimum iki microservice'in olduğu bir yapıdır. Müşteri (customer) ve sipariş (order) oluşturulması hedeflenmiştir. 
 
 ## Çalıştırma (Running) ve Kullanımı (How to use)
 `docker compose up` : Bu komutu order-application içerisinde çalıştırarak projeyi ayağa kaldırabilirsiniz.
@@ -25,9 +25,9 @@ API Base Endpoint (BASE_ENPOINT): `http://localhost:5000/`
 
 - **Örnekler curl ile (Examples with curl)**
 
-Kullanıcı listeleme (Customer List): `curl -X 'GET' \ '[BASE_ENDPOINT]/customer?page=1&limit=10' \ -H 'accept: text/plain'`
+Müşteri listeleme (Customer List): `curl -X 'GET' \ '[BASE_ENDPOINT]/customer?page=1&limit=10' \ -H 'accept: text/plain'`
 
-Kullanıcı oluşturma (Create Customer): `curl -X 'POST' \
+Müşteri oluşturma (Create Customer): `curl -X 'POST' \
   '[BASE_ENDPOINT]/customer' \
   -H 'accept: text/plain' \
   -H 'Content-Type: application/json' \
@@ -42,12 +42,12 @@ Kullanıcı oluşturma (Create Customer): `curl -X 'POST' \
     }
 }'`
 
-Kullanıcı detayları (Customer Details): `curl -X 'GET' \
+Müşteri detayları (Customer Details): `curl -X 'GET' \
   '[BASE_ENDPOINT]/customer/{id}' \
   -H 'accept: text/plain'
 `
 
-Kullanıcı sil (Delete Customer): `curl -X 'DELETE' \
+Müşteri sil (Delete Customer): `curl -X 'DELETE' \
   '[BASE_ENDPOINT]/customer/{id}' \
   -H 'accept: */*'
 `
@@ -78,8 +78,8 @@ Order Oluşturma (Create Order): `curl -X 'POST' \ '[BASE_ENDPOINT]/order' \ -H 
 Order listeleme (Order List): `curl -X 'GET' \ '[BASE_ENDPOINT]/order/{id}' \ -H 'accept: text/plain'`
 
 ## Teknik Tasarım
-#### Kullanıcılar
-Sistemde teorik anlamda sınırsız sayıda kullanıcı kaydı yapılabilmektedir.
+#### Müşteriler
+Sistemde teorik anlamda sınırsız sayıda müşteri kaydı yapılabilmektedir.
 
 Veri yapısındaki alanlar aşağıdaki gibidir:
 - UUID
@@ -91,12 +91,12 @@ Veri yapısındaki alanlar aşağıdaki gibidir:
   - Ülke (Country)
   - Şehir Kodu (CityCode)
 
-#### Satışlar
-Sistemde teorik anlamda sınırsız sayıda satış kaydı yapılabilmektedir.
+#### Siparişler
+Sistemde teorik anlamda sınırsız sayıda sipariş kaydı yapılabilmektedir.
 
 Veri yapısındaki alanlar aşağıdaki gibidir:
 - UUID
-- Kullanıcı UUID
+- Müşteri UUID
 - Miktar (Quantity)
 - Fiyat (Price)
 - Statü (Status)
